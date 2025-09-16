@@ -3,27 +3,36 @@ import LeftLogo from '/house.svg'
 import './App.css'
 import * as Cookies from 'es-cookie'
 
-function filList(){
-	var curPath = window.location.pathname;
-	console.log(curPath);
-	return curPath;
+async function filList() {
+  const curPath = window.location.pathname
+//  console.log(curPath)
+  console.log(Cookies.get('oldPath'));
+
+  try {
+    const res = await fetch('http://localhost/api/wawAPI/' + curPath)
+    const text = await res.text()
+//	console.log(text);
+	Cookies.set('oldPath', curPath);
+    return text
+  } catch (err) {
+    console.error('fetch failed:', err)
+    return 'error fetching'
+  }
 }
 
 function App() {
-	const [count, setCount] = useState(+Cookies.get('count'));
+	const [oldPath, setoldPath] = useState((!Cookies.get('oldPath'))? "NOT SET YET" : Cookies.get('oldPath'));
 	const [path, setPath] = useState(null);
 	return (
 		<>
 		<div>
-			<a href="https://iam.gay" target="_blank">
+			<a href="/" target="_blank">
 				<img src={LeftLogo} className="logo" />
 			</a>
 		</div>
 		<h1>The Team</h1>
 		<div className="card">
-			<button onClick={() => {setCount((count) => count + 1);	Cookies.set('count', count+1);} }>
-				you clicked teh button {count} times
-			</button>
+			<p> THE OLD PATH IS {oldPath} </p>
 			<button onClick={() => {setPath(filList())}}>
 				GET THE PATH DUMMIE
 			</button>
