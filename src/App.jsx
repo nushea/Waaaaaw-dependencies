@@ -8,13 +8,11 @@ import * as Cookies from 'es-cookie'
 
 async function filList() {
   const curPath = window.location.pathname
-//  console.log(Cookies.get('oldPath'));
 
   try {
     const res = await fetch('http://localhost/api/wawAPI/' + curPath)
     const text = await res.text();
 //	console.log(text.split('\n'));
-	Cookies.set('oldPath', curPath);
 	if((curPath.match(/\//g) || []).length == 2 && curPath.substring(1, curPath.lastIndexOf('/')) == "home")
 		Cookies.set('Username', curPath.substring(curPath.lastIndexOf('/')+1));
     return text.split('\n');
@@ -38,33 +36,78 @@ function File({item}){
 	return;
 }
 function HomeButton(){
-
+	const homepath = (!Cookies.get("Username"))? "/home" : "/home/"+Cookies.get("Username");
 	return (
 		<>
-			<a href="/home" className="nav">
-				<img src={LeftLogo} className="logo" />
+			<a href={homepath} className="nav">
+				<img src="/img/icons8-home-96.png" />
 			</a>
 		</>
 	);
 }
 
+function UpButton(){
+	var path = window.location.pathname;
+	path = path.substring(0, path.lastIndexOf('/'));
+	return (
+		<>
+			<a href={path} className="nav">
+				<img src="/img/icons8-upward-96.png" />
+			</a>
+		</>
+	);
+}
+
+function LeftButton(){
+	return (
+		<>
+			<button onClick={() => { history.go(-1); } } className="nav navbut">
+				<img src="/img/icons8-back-96.png" />
+			</button>
+		</>
+	);
+}
+
+function RightButton(){
+	return (
+		<>
+			<button onClick={() => { history.go(1); } } className="nav navbut">
+				<img src="/img/icons8-forward-96.png" />
+			</button>
+		</>
+	);
+}
 
 function NavBar(){
 	return (
 		<>
 			<div id="navbar">
-				<HomeButton />
-				<HomeButton />
-				<HomeButton />
-				<HomeButton />
-				<HomeButton />
-				<HomeButton />
+				<div id="AppName">
+					<p>WÃÃW</p>
+					<HomeButton />
+				</div>
+				<div id="navButtons">
+					<LeftButton />
+					<RightButton />
+					<UpButton />
+				</div>
 			</div>
 		</>
 	);
 }
+
+
+function BreadCrumbs(){
+	var path = window.location.pathname;
+	return (
+		<>
+		<form onSubmit={(event) => {event.preventDefault();window.location = document.getElementById("breadcrumbs").value;}}>
+			<input id="breadcrumbs" defaultValue={path}  />
+		</form>
+		</>
+	);
+}
 function App() {
-	const [oldPath, setoldPath] = useState((!Cookies.get('oldPath'))? "NOT SET YET" : Cookies.get('oldPath'));
 	const [path, setPath] = useState([]);
 	useEffect(() => {
 		filList().then(data => setPath(data));
@@ -72,27 +115,35 @@ function App() {
 	return (
 		<>
 		<div id="Items">
-		<div id="Left">
-			<NavBar />
-		</div>
-		<div id="Middle">
-			<div id="Upper">
-			<h1>The Team</h1>
+			<div id="Left">
+				<NavBar />
 			</div>
-			<div id="Lower">
-			<div className="Files">
-			  {path.map((line, i) => (
-				<div key={i}>
-					<File item = {line} />
-				  </div>
-			  ))}
+			<div id="Middle">
+				<div id="Upper">
+				<BreadCrumbs />
+				</div>
+				<div id="Lower">
+				<div className="Files">
+				  {path.map((line, i) => (
+					<div key={i}>
+						<File item = {line} />
+					  </div>
+				  ))}
+				</div>
+				</div>
 			</div>
+			<div id="Right">
+				<div id="Preview">
+					<p> Dummy preview </p>
+				</div>
+				<div id="credits">
+					<a href={"https://icons8.com/"}>
+						Icons by https://icons8.com/
+					</a>
+				</div>
 			</div>
 		</div>
-		<div id="Right">
-			<p> Right </p>
-		</div>
-		</div>
+			
 	</>
 	)
 }
