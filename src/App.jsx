@@ -5,9 +5,10 @@ import LeftLogo from '/house.svg'
 import './format.css'
 import './other.css'
 import * as Cookies from 'es-cookie'
+import { useLocation } from "react-router"
 
-async function filList() {
-  const curPath = window.location.pathname
+async function filList(pathname) {
+  const curPath = pathname;
 
   try {
     const res = await fetch('http://localhost/api/wawAPI/' + curPath)
@@ -24,15 +25,27 @@ async function filList() {
 function File({item}){
 	const path = item.substring(item.lastIndexOf(" "));
 	const name = item.substring(item.lastIndexOf("/")+1);
-	if(path.length > 0)
-		return (
-			<>
-			<a href={path} className="card">
-				<img src={LeftLogo} className="logo" />
-				<p> {name} </p>
-			</a>
-			</>
-		);
+	if(path.length > 0){
+		if(item.substring(0,1) == "#")
+			return (
+				<>
+				<a href={path} className="card">
+					<img src="/img/icons8-folder-96.png" className="logo" />
+					<p> {name} </p>
+				</a>
+				</>
+			);
+		else{
+			return (
+				<>
+				<a href={path} className="card">
+					<img src="/img/icons8-file-96.png" className="logo" />
+					<p> {name} </p>
+				</a>
+				</>
+			)
+		}
+	}
 	return;
 }
 function HomeButton(){
@@ -47,8 +60,10 @@ function HomeButton(){
 }
 
 function UpButton(){
-	var path = window.location.pathname;
+	var path = useLocation().pathname;
 	path = path.substring(0, path.lastIndexOf('/'));
+	if(!path) path = "/";
+	console.log(path)
 	return (
 		<>
 			<a href={path} className="nav">
@@ -81,12 +96,12 @@ function RightButton(){
 function NavBar(){
 	return (
 		<>
-			<div id="navbar">
-				<div id="AppName">
+			<div className="navbar">
+				<div className="AppName">
 					<p>WÃÃW</p>
 					<HomeButton />
 				</div>
-				<div id="navButtons">
+				<div className="navButtons">
 					<LeftButton />
 					<RightButton />
 					<UpButton />
@@ -98,33 +113,34 @@ function NavBar(){
 
 
 function BreadCrumbs(){
-	var path = window.location.pathname;
+	const [path, setPath] = useState(useLocation().pathname);
 	return (
 		<>
-		<form onSubmit={(event) => {event.preventDefault();window.location = document.getElementById("breadcrumbs").value;}}>
-			<input id="breadcrumbs" defaultValue={path}  />
+		<form onSubmit={(event) => {event.preventDefault();useLocation().pathname}}>
+			<input className="breadcrumbs" type="text" value={path} onChange={(event) => { setPath(event.target.value); }}  />
 		</form>
 		</>
 	);
 }
 function App() {
 	const [path, setPath] = useState([]);
+	const localpath = useLocation().pathname;
 	useEffect(() => {
-		filList().then(data => setPath(data));
+		filList(localpath).then(data => setPath(data));
 	}, []);
 	return (
 		<>
-		<div id="Items">
-			<div id="Left">
+		<div className="Items">
+			<div className="Left">
 				<NavBar />
 			</div>
-			<div id="Middle">
-				<div id="Upper">
+			<div className="Middle">
+				<div className="Upper">
 				<BreadCrumbs />
 				</div>
-				<div id="Lower">
+				<div className="Lower">
 				<div className="Files">
-				  {path.map((line, i) => (
+				  {...path.map((line, i) => (
 					<div key={i}>
 						<File item = {line} />
 					  </div>
@@ -132,11 +148,11 @@ function App() {
 				</div>
 				</div>
 			</div>
-			<div id="Right">
-				<div id="Preview">
+			<div className="Right">
+				<div className="Preview">
 					<p> Dummy preview </p>
 				</div>
-				<div id="credits">
+				<div className="credits">
 					<a href={"https://icons8.com/"}>
 						Icons by https://icons8.com/
 					</a>
