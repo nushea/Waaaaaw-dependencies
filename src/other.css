@@ -1,10 +1,15 @@
 body{
 /*	overflow: hidden;*/
 }
-.card{
+.card {
 	display: flex;
 	flex-direction: column;
-	width:12cqw;
+	width: 12cqw;
+	background-color: transparent;
+	border: 0;
+    color: rgb(204,214,244);
+    font-size: 2cqw;
+    font-family: 'BAU', sans-serif;
 }
 .card>img{
 	width: 11cqw;
@@ -70,4 +75,7 @@ body{
 	padding: 0;
 	width: 100%;
 	font-family: inherit;
+}
+.FileManager{
+	display: flex;
 }

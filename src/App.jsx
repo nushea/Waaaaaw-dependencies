@@ -5,43 +5,42 @@ import LeftLogo from '/house.svg'
 import './format.css'
 import './other.css'
 import * as Cookies from 'es-cookie'
-import { useLocation } from "react-router"
+import { useLocation, BrowserRouter, Routes, Route } from "react-router"
 
 async function filList(pathname) {
-  const curPath = pathname;
+	var curPath = pathname;
 
-  try {
-    const res = await fetch('http://localhost/api/wawAPI/' + curPath)
-    const text = await res.text();
-//	console.log(text.split('\n'));
-	if((curPath.match(/\//g) || []).length == 2 && curPath.substring(1, curPath.lastIndexOf('/')) == "home")
-		Cookies.set('Username', curPath.substring(curPath.lastIndexOf('/')+1));
-    return text.split('\n');
-  } catch (err) {
-    console.error('fetch failed:', err)
-    return 'error fetching'
-  }
+	try {
+		const res = await fetch('http://localhost/api/wawAPI/' + curPath)
+		const text = await res.text();
+		if((curPath.match(/\//g) || []).length == 2 && curPath.substring(1, curPath.lastIndexOf('/')) == "home")
+			Cookies.set('Username', curPath.substring(curPath.lastIndexOf('/')+1));
+		return text.split('\n');
+	  } catch (err) {
+		console.error('fetch failed:', err)
+		return 'error fetching'
+	  }
 }
-function File({item}){
-	const path = item.substring(item.lastIndexOf(" "));
+function File({item, setPath}){
+	const path = item.substring(item.lastIndexOf(" ")+1);
 	const name = item.substring(item.lastIndexOf("/")+1);
 	if(path.length > 0){
 		if(item.substring(0,1) == "#")
 			return (
 				<>
-				<a href={path} className="card">
+				<button onClick={() => setPath(path)} className="card">
 					<img src="/img/icons8-folder-96.png" className="logo" />
 					<p> {name} </p>
-				</a>
+				</button>
 				</>
 			);
 		else{
 			return (
 				<>
-				<a href={path} className="card">
+				<button onClick={() => setPath(path)} className="card">
 					<img src="/img/icons8-file-96.png" className="logo" />
 					<p> {name} </p>
-				</a>
+				</button>
 				</>
 			)
 		}
@@ -63,7 +62,6 @@ function UpButton(){
 	var path = useLocation().pathname;
 	path = path.substring(0, path.lastIndexOf('/'));
 	if(!path) path = "/";
-	console.log(path)
 	return (
 		<>
 			<a href={path} className="nav">
@@ -112,22 +110,26 @@ function NavBar(){
 }
 
 
-function BreadCrumbs(){
-	const [path, setPath] = useState(useLocation().pathname);
+function BreadCrumbs({path, setPath}){
+	const [crumb, setCrumb] = useState(path);
+	useEffect(() => {
+		setCrumb(path);
+	}, [path]);
+
 	return (
 		<>
-		<form onSubmit={(event) => {event.preventDefault();useLocation().pathname}}>
-			<input className="breadcrumbs" type="text" value={path} onChange={(event) => { setPath(event.target.value); }}  />
+		<form onSubmit={(event) => {event.preventDefault(); setPath(crumb)}}>
+			<input className="breadcrumbs" type="text" value={crumb} onChange={(event) => { setCrumb(event.target.value); }}  />
 		</form>
 		</>
 	);
 }
 function App() {
-	const [path, setPath] = useState([]);
-	const localpath = useLocation().pathname;
+	const [items, setItems] = useState([]);
+	const [path, setPath] = useState(useLocation().pathname);
 	useEffect(() => {
-		filList(localpath).then(data => setPath(data));
-	}, []);
+		filList(path).then(data => {setItems(data);});
+	}, [path]);
 	return (
 		<>
 		<div className="Items">
@@ -136,13 +138,13 @@ function App() {
 			</div>
 			<div className="Middle">
 				<div className="Upper">
-				<BreadCrumbs />
+				<BreadCrumbs path={path} setPath={setPath} />
 				</div>
 				<div className="Lower">
 				<div className="Files">
-				  {...path.map((line, i) => (
+				  {...items.map((line, i) => (
 					<div key={i}>
-						<File item = {line} />
+						<File item = {line} setPath={setPath} />
 					  </div>
 				  ))}
 				</div>
