@@ -125,14 +125,16 @@ function BreadCrumbs({path, setPath}){
 		</>
 	);
 }
-function App() {
+function FE() {
 	const [items, setItems] = useState([]);
-	const [path, setPath] = useState(useLocation().pathname);
-	const [history, setHistory] = useState([]);
+	const [path, setPath] = useState("");
+	const [history, setHistory] = useState(["/"]);
 	const [historyPoint, setHistoryPoint] = useState(0);
 	const [oldHistoryPoint, setOldHistoryPoint] = useState(0);
+	const [changeHistory, setChangeHistory] = useState(0); //this maintains a working history that is append only
 	useEffect(() => {
-		if(history.length == historyPoint){
+//		console.log("sethistory:",changeHistory, "\nhp:", historyPoint, "ohp:", oldHistoryPoint, "\nhistory:", history);
+		if(changeHistory){
 			var newHist = history; 
 			newHist.push(path);
 			if(newHist.length > 20)
@@ -141,6 +143,7 @@ function App() {
 			setOldHistoryPoint(history.length);
 			setHistoryPoint(history.length);
 		}
+		setChangeHistory(1);
 		filList(path).then(data => {setItems(data);});
 	}, [path]);
 	useEffect(() => {
@@ -150,6 +153,7 @@ function App() {
 		if(historyPoint < 0) {setHistoryPoint(0); return;}
 		if(historyPoint > history.length) {setHistoryPoint(history.length); return;}
 		if(historyPoint == history.length) return;
+		setChangeHistory(0);
 		setPath(history[historyPoint]);
 	}, [historyPoint]);
 	return (
@@ -184,6 +188,14 @@ function App() {
 			</div>
 		</div>
 			
+	</>
+	)
+}
+
+function App() {
+	return (
+	<>
+		<FE />
 	</>
 	)
 }
