@@ -5,6 +5,8 @@ body{
 	display: flex;
 	flex-direction: column;
 	width: 12cqw;
+}
+button{	
 	background-color: transparent;
 	border: 0;
     color: rgb(204,214,244);

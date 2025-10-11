@@ -6,6 +6,7 @@ import './format.css'
 import './other.css'
 import * as Cookies from 'es-cookie'
 import { useLocation, BrowserRouter, Routes, Route } from "react-router"
+import { useEffectEvent } from 'react';
 
 async function filList(pathname) {
 	var curPath = pathname;
@@ -47,62 +48,62 @@ function File({item, setPath}){
 	}
 	return;
 }
-function HomeButton(){
+function HomeButton({setPath}){
 	const homepath = (!Cookies.get("Username"))? "/home" : "/home/"+Cookies.get("Username");
 	return (
 		<>
-			<a href={homepath} className="nav">
+			<button onClick={() => setPath(homepath)} className="nav">
 				<img src="/img/icons8-home-96.png" />
-			</a>
+			</button>
 		</>
 	);
 }
 
-function UpButton(){
-	var path = useLocation().pathname;
-	path = path.substring(0, path.lastIndexOf('/'));
-	if(!path) path = "/";
+function UpButton({path, setPath}){
+	var newPath = path;
+	newPath = newPath.substring(0, newPath.lastIndexOf('/'));
+	if(!newPath) newPath = "/";
 	return (
 		<>
-			<a href={path} className="nav">
+			<button onClick={() => setPath(newPath)} className="nav">
 				<img src="/img/icons8-upward-96.png" />
-			</a>
+			</button>
 		</>
 	);
 }
 
-function LeftButton(){
+function LeftButton({historyPoint, setHistoryPoint}){
 	return (
 		<>
-			<button onClick={() => { history.go(-1); } } className="nav navbut">
+			<button onClick={() => { setHistoryPoint(historyPoint-1);} } className="nav navbut">
 				<img src="/img/icons8-back-96.png" />
 			</button>
 		</>
 	);
 }
 
-function RightButton(){
+function RightButton({historyPoint, setHistoryPoint}){
 	return (
 		<>
-			<button onClick={() => { history.go(1); } } className="nav navbut">
+			<button onClick={() => { setHistoryPoint(historyPoint+1); } } className="nav navbut">
 				<img src="/img/icons8-forward-96.png" />
 			</button>
 		</>
 	);
 }
 
-function NavBar(){
+function NavBar({path, setPath, historyPoint, setHistoryPoint}){
 	return (
 		<>
 			<div className="navbar">
 				<div className="AppName">
 					<p>WÃÃW</p>
-					<HomeButton />
+					<HomeButton setPath={setPath}/>
 				</div>
 				<div className="navButtons">
-					<LeftButton />
-					<RightButton />
-					<UpButton />
+					<LeftButton historyPoint={historyPoint} setHistoryPoint={setHistoryPoint} />
+					<RightButton historyPoint={historyPoint} setHistoryPoint={setHistoryPoint} />
+					<UpButton path={path} setPath={setPath}/>
 				</div>
 			</div>
 		</>
@@ -127,14 +128,35 @@ function BreadCrumbs({path, setPath}){
 function App() {
 	const [items, setItems] = useState([]);
 	const [path, setPath] = useState(useLocation().pathname);
+	const [history, setHistory] = useState([]);
+	const [historyPoint, setHistoryPoint] = useState(0);
+	const [oldHistoryPoint, setOldHistoryPoint] = useState(0);
 	useEffect(() => {
+		if(history.length == historyPoint){
+			var newHist = history; 
+			newHist.push(path);
+			if(newHist.length > 20)
+				newHist.shift();
+			setHistory(newHist);
+			setOldHistoryPoint(history.length);
+			setHistoryPoint(history.length);
+		}
 		filList(path).then(data => {setItems(data);});
 	}, [path]);
+	useEffect(() => {
+		//this works by setting history.length as a de facto "last position" even though the actual place in the history array where path is is in history.length - 1, oldHistoryPoint only matters insofar as to mention whether the place it starts from is history.length (as to skip the history.length -1 ) or to set up the state back to enable the aforementioned skip (since history.length-1 and history.length are treated the same)
+		if(oldHistoryPoint == history.length && historyPoint == history.length - 1) {setOldHistoryPoint(historyPoint); setHistoryPoint(historyPoint-1); return;}
+		if(oldHistoryPoint == history.length - 1 && historyPoint == history.length) {setOldHistoryPoint(history.length); return;}
+		if(historyPoint < 0) {setHistoryPoint(0); return;}
+		if(historyPoint > history.length) {setHistoryPoint(history.length); return;}
+		if(historyPoint == history.length) return;
+		setPath(history[historyPoint]);
+	}, [historyPoint]);
 	return (
 		<>
 		<div className="Items">
 			<div className="Left">
-				<NavBar />
+				<NavBar  path={path} setPath={setPath} historyPoint={historyPoint} setHistoryPoint={setHistoryPoint} />
 			</div>
 			<div className="Middle">
 				<div className="Upper">
