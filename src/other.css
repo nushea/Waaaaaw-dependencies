@@ -1,10 +1,29 @@
-body{
-/*	overflow: hidden;*/
+.application {
+	position: fixed;
+	width: 50%;
+	height: 50%;
+}
+.decorator {
+	width: 100%;
+	height: 5cqh;
+	border: 1px #cba6f7 solid;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+.decoratorHandle{
+	width: 100%;
+}
+.Items {
+	width: 100%;
+	height: calc(100% - 5cqh);
+	border: 1px #cba6f7 solid;
 }
 .card {
 	display: flex;
 	flex-direction: column;
-	width: 12cqw;
+	width: 12.5cqw;
+	word-wrap: anywhere;
 }
 button{	
 	background-color: transparent;
@@ -14,15 +33,19 @@ button{
     font-family: 'BAU', sans-serif;
 }
 .card>img{
-	width: 11cqw;
+	width: 90%;
 }
 .card>p{
 	text-align:center;
+	font-size: 90%;
 }
 .Files{
 	display: flex;
 	flex-wrap: wrap;
 	overflow-y: scroll;
+}
+.Upper>form{
+	font-size: 0;
 }
 .Upper{
 	height:10cqh;
@@ -43,6 +66,34 @@ button{
 }
 .nav{
 	width:33.33%;
+}
+.sizeBar {
+	justify-content: center;
+	display: flex;
+}
+.sizeSlider {
+  -webkit-appearance: none;
+  width: 90%;
+  height: 10px;
+  border-radius: 5px;
+  background: #cba6f7;
+  outline: none;
+  margin-bottom:10px;
+}
+.sizeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #1e1e2e;
+}
+
+.sizeSlider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #1e1e2e;
 }
 .AppName{
 	width:100%;
@@ -69,7 +120,7 @@ button{
 }
 .breadcrumbs{
 	width:100%;
-	font-size: 4cqw;
+	font-size: 2.5cqw;
 	text-align: center;
 	background-color: #313244;
 	color: #f5c2e7;

@@ -1,203 +1,62 @@
-import { useState } from 'react'
-import { useEffect } from "react";
-import LeftLogo from '/house.svg'
-//import './App.css'
 import './format.css'
 import './other.css'
-import * as Cookies from 'es-cookie'
-import { useLocation, BrowserRouter, Routes, Route } from "react-router"
-import { useEffectEvent } from 'react';
+import FE from './FE.jsx';
 
-async function filList(pathname) {
-	var curPath = pathname;
 
-	try {
-		const res = await fetch('http://localhost/api/wawAPI/' + curPath)
-		const text = await res.text();
-		if((curPath.match(/\//g) || []).length == 2 && curPath.substring(1, curPath.lastIndexOf('/')) == "home")
-			Cookies.set('Username', curPath.substring(curPath.lastIndexOf('/')+1));
-		return text.split('\n');
-	  } catch (err) {
-		console.error('fetch failed:', err)
-		return 'error fetching'
-	  }
-}
-function File({item, setPath}){
-	const path = item.substring(item.lastIndexOf(" ")+1);
-	const name = item.substring(item.lastIndexOf("/")+1);
-	if(path.length > 0){
-		if(item.substring(0,1) == "#")
-			return (
-				<>
-				<button onClick={() => setPath(path)} className="card">
-					<img src="/img/icons8-folder-96.png" className="logo" />
-					<p> {name} </p>
-				</button>
-				</>
-			);
-		else{
-			return (
-				<>
-				<button onClick={() => setPath(path)} className="card">
-					<img src="/img/icons8-file-96.png" className="logo" />
-					<p> {name} </p>
-				</button>
-				</>
-			)
+
+function Decorator({AppType}){
+	var relativeX = 0, relativeY = 0;
+	var isDown = false;
+	function handleMouseDown(e) {
+		if(isDown == false){
+			isDown = true;
+			const rect = e.currentTarget.getBoundingClientRect();
+			relativeX = e.clientX-rect.left;
+			relativeY = e.clientY-rect.top;
 		}
 	}
-	return;
-}
-function HomeButton({setPath}){
-	const homepath = (!Cookies.get("Username"))? "/home" : "/home/"+Cookies.get("Username");
-	return (
-		<>
-			<button onClick={() => setPath(homepath)} className="nav">
-				<img src="/img/icons8-home-96.png" />
-			</button>
-		</>
-	);
-}
-
-function UpButton({path, setPath}){
-	var newPath = path;
-	newPath = newPath.substring(0, newPath.lastIndexOf('/'));
-	if(!newPath) newPath = "/";
-	return (
-		<>
-			<button onClick={() => setPath(newPath)} className="nav">
-				<img src="/img/icons8-upward-96.png" />
-			</button>
-		</>
-	);
-}
-
-function LeftButton({historyPoint, setHistoryPoint}){
-	return (
-		<>
-			<button onClick={() => { setHistoryPoint(historyPoint-1);} } className="nav navbut">
-				<img src="/img/icons8-back-96.png" />
-			</button>
-		</>
-	);
-}
-
-function RightButton({historyPoint, setHistoryPoint}){
-	return (
-		<>
-			<button onClick={() => { setHistoryPoint(historyPoint+1); } } className="nav navbut">
-				<img src="/img/icons8-forward-96.png" />
-			</button>
-		</>
-	);
-}
-
-function NavBar({path, setPath, historyPoint, setHistoryPoint}){
-	return (
-		<>
-			<div className="navbar">
-				<div className="AppName">
-					<p>WÃÃW</p>
-					<HomeButton setPath={setPath}/>
-				</div>
-				<div className="navButtons">
-					<LeftButton historyPoint={historyPoint} setHistoryPoint={setHistoryPoint} />
-					<RightButton historyPoint={historyPoint} setHistoryPoint={setHistoryPoint} />
-					<UpButton path={path} setPath={setPath}/>
-				</div>
-			</div>
-		</>
-	);
-}
-
-
-function BreadCrumbs({path, setPath}){
-	const [crumb, setCrumb] = useState(path);
-	useEffect(() => {
-		setCrumb(path);
-	}, [path]);
-
-	return (
-		<>
-		<form onSubmit={(event) => {event.preventDefault(); setPath(crumb)}}>
-			<input className="breadcrumbs" type="text" value={crumb} onChange={(event) => { setCrumb(event.target.value); }}  />
-		</form>
-		</>
-	);
-}
-function FE() {
-	const [items, setItems] = useState([]);
-	const [path, setPath] = useState("");
-	const [history, setHistory] = useState(["/"]);
-	const [historyPoint, setHistoryPoint] = useState(0);
-	const [oldHistoryPoint, setOldHistoryPoint] = useState(0);
-	const [changeHistory, setChangeHistory] = useState(0); //this maintains a working history that is append only
-	useEffect(() => {
-//		console.log("sethistory:",changeHistory, "\nhp:", historyPoint, "ohp:", oldHistoryPoint, "\nhistory:", history);
-		if(changeHistory){
-			var newHist = history; 
-			newHist.push(path);
-			if(newHist.length > 20)
-				newHist.shift();
-			setHistory(newHist);
-			setOldHistoryPoint(history.length);
-			setHistoryPoint(history.length);
+	function handleMouseUp() {
+		isDown = false;
+	}
+	function handleMouseMove(e) {
+		var parent = e.currentTarget.parentNode.parentNode;
+		if(isDown){
+			parent.style.left = (e.clientX - relativeX) + "px";
+			parent.style.top = (e.clientY - relativeY) + "px";
 		}
-		setChangeHistory(1);
-		filList(path).then(data => {setItems(data);});
-	}, [path]);
-	useEffect(() => {
-		//this works by setting history.length as a de facto "last position" even though the actual place in the history array where path is is in history.length - 1, oldHistoryPoint only matters insofar as to mention whether the place it starts from is history.length (as to skip the history.length -1 ) or to set up the state back to enable the aforementioned skip (since history.length-1 and history.length are treated the same)
-		if(oldHistoryPoint == history.length && historyPoint == history.length - 1) {setOldHistoryPoint(historyPoint); setHistoryPoint(historyPoint-1); return;}
-		if(oldHistoryPoint == history.length - 1 && historyPoint == history.length) {setOldHistoryPoint(history.length); return;}
-		if(historyPoint < 0) {setHistoryPoint(0); return;}
-		if(historyPoint > history.length) {setHistoryPoint(history.length); return;}
-		if(historyPoint == history.length) return;
-		setChangeHistory(0);
-		setPath(history[historyPoint]);
-	}, [historyPoint]);
+		console.log(isDown, relativeX, relativeY);
+	}
+	const name = AppType.name;
 	return (
-		<>
-		<div className="Items">
-			<div className="Left">
-				<NavBar  path={path} setPath={setPath} historyPoint={historyPoint} setHistoryPoint={setHistoryPoint} />
-			</div>
-			<div className="Middle">
-				<div className="Upper">
-				<BreadCrumbs path={path} setPath={setPath} />
-				</div>
-				<div className="Lower">
-				<div className="Files">
-				  {...items.map((line, i) => (
-					<div key={i}>
-						<File item = {line} setPath={setPath} />
-					  </div>
-				  ))}
-				</div>
-				</div>
-			</div>
-			<div className="Right">
-				<div className="Preview">
-					<p> Dummy preview </p>
-				</div>
-				<div className="credits">
-					<a href={"https://icons8.com/"}>
-						Icons by https://icons8.com/
-					</a>
-				</div>
+	<>
+		<div className="decorator">
+			<p> {name} </p>
+			<div onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} className="decoratorHandle"/> 
+			<div className="decoratorButtons">
+				MMX
 			</div>
 		</div>
-			
 	</>
 	)
+}
+
+function NewApp({AppType}){
+	return (
+	<>
+		<div className="application">
+			<Decorator AppType={AppType}/>
+			<AppType />
+		</div>
+	</>
+	);
 }
 
 function App() {
 	return (
 	<>
-		<FE />
+		<NewApp AppType={FE} />
 	</>
 	)
 }
 
-export default App
+export default App;
