@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import './format.css'
 import './other.css'
 import * as Cookies from 'es-cookie'
@@ -20,14 +19,14 @@ async function filList(pathname) {
 		return 'error fetching'
 	  }
 }
-function File({item, setPath}){
+function File({item, setPath, itemSize}){
 	const path = item.substring(item.indexOf("/"));
 	const name = item.substring(item.lastIndexOf("/")+1);
 	if(path.length > 0){
 		if(item.substring(0,1) == "#")
 			return (
 				<>
-				<button onClick={() => setPath(path)} className="card">
+				<button onClick={() => setPath(path)} style={{ width: `${itemSize * 10 / 100}cqw` }} className="card">
 					<img src="/img/icons8-folder-96.png" className="logo" />
 					<p> {name} </p>
 				</button>
@@ -36,7 +35,7 @@ function File({item, setPath}){
 		else{
 			return (
 				<>
-				<button onClick={() => setPath(path)} className="card">
+				<button onClick={() => setPath(path)} style={{width:{itemSize}*10/100+"cqw"}} className="card">
 					<img src="/img/icons8-file-96.png" className="logo" />
 					<p> {name} </p>
 				</button>
@@ -108,20 +107,11 @@ function NavBar({path, setPath, historyPoint, setHistoryPoint}){
 	);
 }
 
-function sizeSliderLogic(value){
-	const cards = document.querySelectorAll('.card');
-
-	cards.forEach(card => {
-	  card.style.width = (value*10/100)+"cqw";
-	});
-
-}
-
-function SizeBar(){
+function SizeBar({setItemSize}){
 	return (
 		<>
 		<div className="sizeBar">
-			<input type="range" min="50" max="200" defaultValue="125" className="sizeSlider" onChange={(event) => { sizeSliderLogic(event.target.value) }}  />
+			<input type="range" min="50" max="150" defaultValue="100" className="sizeSlider" onChange={(event) => { setItemSize(event.target.value) }}  />
 		</div>
 		</>
 	);
@@ -150,8 +140,9 @@ export default function FE() {
 	const [historyPoint, setHistoryPoint] = useState(0);
 	const [oldHistoryPoint, setOldHistoryPoint] = useState(0);
 	const [changeHistory, setChangeHistory] = useState(0); //this maintains a working history that is append only
+	const [itemSize, setItemSize] = useState(100);
+	const ItemsRef = useRef(null);
 	useEffect(() => {
-//		console.log("sethistory:",changeHistory, "\nhp:", historyPoint, "ohp:", oldHistoryPoint, "\nhistory:", history);
 		if(changeHistory){
 			var newHist = history; 
 			newHist.push(path);
@@ -174,12 +165,19 @@ export default function FE() {
 		setChangeHistory(0);
 		setPath(history[historyPoint]);
 	}, [historyPoint]);
+	useEffect(() => {
+		const cards = ItemsRef.current.querySelectorAll('.card');
+
+		cards.forEach(card => {
+			card.style.width = (itemSize*10/100)+"cqw";
+		});
+	}, [itemSize] );
 	return (
 		<>
-		<div className="FE Items">
+		<div className="FE Items" ref={ItemsRef}>
 			<div className="Left">
 				<NavBar  path={path} setPath={setPath} historyPoint={historyPoint} setHistoryPoint={setHistoryPoint} />
-				<SizeBar />
+				<SizeBar setItemSize={setItemSize}/>
 			</div>
 			<div className="Middle">
 				<div className="Upper">
@@ -189,7 +187,7 @@ export default function FE() {
 				<div className="Files">
 				  {...items.map((line, i) => (
 					<div key={i}>
-						<File item = {line} setPath={setPath} />
+						<File item ={line} itemSize={itemSize} setPath={setPath}/>
 					  </div>
 				  ))}
 				</div>

@@ -10,6 +10,8 @@
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+	text-align: center;
+	background: #11111b;
 }
 .decoratorHandle{
 	width: 100%;
@@ -24,6 +26,7 @@
 	flex-direction: column;
 	width: 12.5cqw;
 	word-wrap: anywhere;
+	margin: 2px;
 }
 button{	
 	background-color: transparent;
@@ -33,7 +36,8 @@ button{
     font-family: 'BAU', sans-serif;
 }
 .card>img{
-	width: 90%;
+	width: 100%; 
+	aspect-ratio: 1 / 1;
 }
 .card>p{
 	text-align:center;
@@ -43,6 +47,10 @@ button{
 	display: flex;
 	flex-wrap: wrap;
 	overflow-y: scroll;
+	width: 100%;
+}
+.Middle{
+	background: #1e1e2e;
 }
 .Upper>form{
 	font-size: 0;
@@ -71,9 +79,15 @@ button{
 	justify-content: center;
 	display: flex;
 }
+.decoratorSlider {
+	align-self: end;
+}
+.FEsizeSliders {
+	display: flex;
+}
 .sizeSlider {
   -webkit-appearance: none;
-  width: 90%;
+  width: 100%;
   height: 10px;
   border-radius: 5px;
   background: #cba6f7;
